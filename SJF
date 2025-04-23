@@ -1,0 +1,59 @@
+import java.util.*;
+
+class Proceso {
+    String nombre;
+    int tiempoLlegada;
+    int rafaga;
+
+    Proceso(String nombre, int tiempoLlegada, int rafaga) {
+        this.nombre = nombre;
+        this.tiempoLlegada = tiempoLlegada;
+        this.rafaga = rafaga;
+    }
+}
+
+public class SJF {
+    public static void main(String[] args) {
+        List<Proceso> procesos = Arrays.asList(
+            new Proceso("P1", 0, 5),
+            new Proceso("P2", 1, 3),
+            new Proceso("P3", 2, 8),
+            new Proceso("P4", 3, 6)
+        );
+
+        procesos.sort(Comparator.comparingInt(p -> p.tiempoLlegada));
+        int tiempo = 0, completados = 0;
+        int esperaTotal = 0, retornoTotal = 0;
+        boolean[] terminado = new boolean[procesos.size()];
+
+        while (completados < procesos.size()) {
+            int idx = -1, menor = Integer.MAX_VALUE;
+
+            for (int i = 0; i < procesos.size(); i++) {
+                Proceso p = procesos.get(i);
+                if (!terminado[i] && p.tiempoLlegada <= tiempo && p.rafaga < menor) {
+                    menor = p.rafaga;
+                    idx = i;
+                }
+            }
+
+            if (idx == -1) {
+                tiempo++;
+                continue;
+            }
+
+            Proceso p = procesos.get(idx);
+            int espera = tiempo - p.tiempoLlegada;
+            int retorno = espera + p.rafaga;
+            esperaTotal += espera;
+            retornoTotal += retorno;
+            tiempo += p.rafaga;
+            terminado[idx] = true;
+            completados++;
+            System.out.println(p.nombre + ": Espera = " + espera + ", Retorno = " + retorno);
+        }
+
+        System.out.printf("Promedio Espera = %.2f, Promedio Retorno = %.2f\n",
+                (float) esperaTotal / procesos.size(), (float) retornoTotal / procesos.size());
+    }
+}
